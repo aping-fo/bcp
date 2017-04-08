@@ -11,6 +11,7 @@ public class BcpSession {
 	private AtomicInteger seq = new AtomicInteger(1); // 服务端维护回应seq，1开始递增
 	/** 重传时间间隔，单位毫秒，下一次重传为RTO*2，以2的指数增加重传时间 */
 	private static final int RTO = 200;
+	private static final int RTO_TIMES = 5;
 	/**
 	 * 最多缓存多少个离线包，实际可以用配置，在这里直接写死
 	 */
@@ -64,15 +65,20 @@ public class BcpSession {
 		return channel.isOpen();
 	}
 
-	public void rto() { //检测可能不是那么精准
+	public boolean rto() { //检测可能不是那么精准
 		if (!isOpen())
-			return;
+			return false;
 		for (Packet packet : packetMap.values()) {
+			if(packet.count >= RTO_TIMES) {
+				close();
+				return false;
+			}
 			if (System.currentTimeMillis() > packet.time) {
 				channel.writeAndFlush(packet);
 				packet.count += 1;
 				packet.time = System.currentTimeMillis() + RTO * (1 << packet.count);
 			}
 		}
+		return true;
 	}
 }
