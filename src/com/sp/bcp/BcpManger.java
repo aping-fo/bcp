@@ -8,13 +8,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BcpManger {
 
-	private final static Map<ChannelId, BcpSession> sessionMap = new ConcurrentHashMap<>();
+	private final static Map<Long, BcpSession> sessionMap = new ConcurrentHashMap<>();
 	
-	public static void addSesion(BcpSession session) {
-		sessionMap.put(session.id(), session);
+	public static void addSesion(Long id,BcpSession session) {
+		if(!sessionMap.containsKey(id)) {
+			sessionMap.put(id, session); 
+		}
+		else {
+			BcpSession session1 = sessionMap.remove(id);
+			session1.close();
+			sessionMap.put(id, session);
+		}
 	}
 	
-	public static void removeSesion(ChannelId id) {
+	public static void removeSesion(Long id) {
 		BcpSession session = sessionMap.remove(id);
 		if(session != null) {
 			session.close();
