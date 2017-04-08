@@ -1,29 +1,33 @@
 package com.sp.bcp;
 
+import com.sp.domain.Cmd;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 
-import java.math.BigInteger;
-
-public class BcpHandler extends SimpleChannelInboundHandler<BigInteger> {
-
-	private BigInteger lastMultiplier = new BigInteger("1");
-	private BigInteger factorial = new BigInteger("1");
-
+public class BcpHandler extends SimpleChannelInboundHandler<Packet> {
 	@Override
-	public void channelRead0(ChannelHandlerContext ctx, BigInteger msg)
-			throws Exception {
-		// Calculate the cumulative factorial and send it to the client.
-		lastMultiplier = msg;
-		factorial = factorial.multiply(msg);
-		ctx.writeAndFlush(factorial);
+	public void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception {
+		if(msg.cmd == Cmd.ACK) {
+			BcpManger.acknowledge(ctx.channel().id(), msg.seq);
+		} 
+		else if(msg.cmd == Cmd.LOGIN) { //登录认证，一般采用RSA非对称加密，这里就省了
+			BcpManger.addSesion(new BcpSession(ctx.channel()));
+		}
+		else { //需要先登录认证
+			//TODO 其他业务
+			boolean ret = BcpManger.addPacket(ctx.channel().id(), msg);
+			if(!ret) {
+				//关闭连接，客户端重新登录认证
+				ctx.channel().close();
+			}
+		}
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		System.err.printf("Factorial of %,d is: %,d%n", lastMultiplier,
-				factorial);
+		//TODO
 	}
 
 	@Override

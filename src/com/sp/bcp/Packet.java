@@ -7,11 +7,15 @@ public class Packet {
 	public final int seq; // 包序列ID
 	public final byte[] data; // 包体
 
+	public long time; //收到数据包时间,不参与网络传输
+	public int count; //重传次数，一般重传3次
+	
 	private Packet(short cmd, int seq, byte[] data) {
 		this.cmd = cmd;
 		this.seq = seq;
 		this.lenght = (short) data.length;
 		this.data = data;
+		time = System.currentTimeMillis();
 	}
 
 	public static Packet valueOf(short cmd, int seq, byte[] data) {
