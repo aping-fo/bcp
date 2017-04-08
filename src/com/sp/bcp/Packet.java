@@ -4,7 +4,7 @@ public class Packet {
 	// 协议头
 	public final short cmd; // 请求指令
 	public final short lenght; // 包体长度
-	public final int seq; // 包序列ID
+	public int seq; // 包序列ID
 	public final byte[] data; // 包体
 
 	public long time; //收到数据包时间,不参与网络传输

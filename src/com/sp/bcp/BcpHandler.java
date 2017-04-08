@@ -7,6 +7,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 
 public class BcpHandler extends SimpleChannelInboundHandler<Packet> {
+	
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception {
 		if(msg.cmd == Cmd.ACK) {
@@ -15,13 +16,8 @@ public class BcpHandler extends SimpleChannelInboundHandler<Packet> {
 		else if(msg.cmd == Cmd.LOGIN) { //登录认证，一般采用RSA非对称加密，这里就省了
 			BcpManger.addSesion(new BcpSession(ctx.channel()));
 		}
-		else { //需要先登录认证
-			//TODO 其他业务
-			boolean ret = BcpManger.addPacket(ctx.channel().id(), msg);
-			if(!ret) {
-				//关闭连接，客户端重新登录认证
-				ctx.channel().close();
-			}
+		else { //需要先登录认证 ,上面2条消息过滤掉
+			//TODO 其他业务，ACK
 		}
 	}
 
