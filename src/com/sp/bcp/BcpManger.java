@@ -11,13 +11,12 @@ public class BcpManger {
 	private final static Map<Long, BcpSession> sessionMap = new ConcurrentHashMap<>();
 	
 	public static void addSesion(Long id,BcpSession session) {
-		if(!sessionMap.containsKey(id)) {
+		if(!sessionMap.containsKey(id)) { 
 			sessionMap.put(id, session); 
 		}
-		else {
+		else {//重连过来的
 			BcpSession session1 = sessionMap.remove(id);
-			session1.close();
-			sessionMap.put(id, session);
+			session1.setChannel(session.getChannel());
 		}
 	}
 	

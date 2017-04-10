@@ -22,8 +22,19 @@ public class BcpSession {
 	//回应的消息缓存，请求消息由客户端维护
 	private Map<Integer, Packet> packetMap = new ConcurrentHashMap<>();
 
+	public void setChannel(Channel channel) {
+		if(this.channel != null) {
+			this.channel.close();
+		}
+		this.channel = channel;
+	}
+
 	public BcpSession(Channel channel) {
 		this.channel = channel;
+	}
+
+	public Channel getChannel() {
+		return channel;
 	}
 
 	public ChannelId id() {
