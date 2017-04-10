@@ -16,14 +16,14 @@ public class BcpSession {
 	 * 最多缓存多少个离线包，实际可以用配置，在这里直接写死
 	 */
 	private static final int MaxOfflinePack = 500;
-	
-	private Channel channel; // 提供多个连接?
-	
-	//回应的消息缓存，请求消息由客户端维护
+
+	private volatile Channel channel; // 提供多个连接?
+
+	// 回应的消息缓存，请求消息由客户端维护
 	private Map<Integer, Packet> packetMap = new ConcurrentHashMap<>();
 
 	public void setChannel(Channel channel) {
-		if(this.channel != null) {
+		if (this.channel != null) {
 			this.channel.close();
 		}
 		this.channel = channel;
@@ -40,7 +40,7 @@ public class BcpSession {
 	public ChannelId id() {
 		return channel.id();
 	}
-	
+
 	public boolean send(Packet packet) {
 		boolean ret = true;
 		try {
@@ -54,7 +54,7 @@ public class BcpSession {
 	}
 
 	public void addPacket(Packet packet) {
-		if(packetMap.size() < MaxOfflinePack) {
+		if (packetMap.size() < MaxOfflinePack) {
 			packetMap.put(packet.seq, packet);
 		}
 	}
@@ -76,11 +76,11 @@ public class BcpSession {
 		return channel.isOpen();
 	}
 
-	public boolean rto() { //检测可能不是那么精准
+	public boolean rto() { // 检测可能不是那么精准
 		if (!isOpen())
 			return false;
 		for (Packet packet : packetMap.values()) {
-			if(packet.count >= RTO_TIMES) {
+			if (packet.count >= RTO_TIMES) {
 				close();
 				return false;
 			}
