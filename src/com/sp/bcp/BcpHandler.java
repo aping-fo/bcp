@@ -10,11 +10,11 @@ public class BcpHandler extends SimpleChannelInboundHandler<Packet> {
 	
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, Packet msg) throws Exception {
-		if(msg.cmd == Cmd.ACK) {
+		if(msg.cmd == Cmd.ACK) { //客户端确认服务器发送的数据
 			BcpManger.acknowledge(ctx.channel().id(), msg.seq);
 		} 
 		else if(msg.cmd == Cmd.LOGIN) { //登录认证，一般采用RSA非对称加密，这里就省了
-			Long id = 0L; //客户端唯一标识，比如userId等
+			Long id = 0L; //客户端唯一标识，比如userId等，这里先随意赋值了
 			BcpManger.addSesion(id,new BcpSession(ctx.channel()));
 		}
 		else { //需要先登录认证 ,上面2条消息过滤掉
